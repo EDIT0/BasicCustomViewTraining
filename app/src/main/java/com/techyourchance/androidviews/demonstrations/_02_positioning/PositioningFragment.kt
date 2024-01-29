@@ -79,6 +79,7 @@ class PositioningFragment : BaseFragment() {
     override fun onStart() {
         super.onStart()
         uiHandler.post {
+            // UI가 다 그려지고 호출
             updateUiValues()
         }
     }

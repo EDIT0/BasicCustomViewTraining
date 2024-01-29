@@ -14,15 +14,22 @@ import timber.log.Timber
 class BasicTouchFragment : BaseFragment() {
 
     override val screenName get() = getString(R.string.screen_name_basic_touch)
+
+    private lateinit var view: View
     
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return View(context).apply {
-            setOnTouchListener { _, event ->
-                Timber.i("touch event ${getEventAction(event)} at (${event.x}, ${event.y});" +
-                        " raw coordinates (${event.rawX}, ${event.rawY})")
-                true
-            }
+        view = View(context)
+        return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        view.setOnTouchListener { _, event ->
+            Timber.i("touch event ${getEventAction(event)} at (${event.x}, ${event.y});" +
+                    " raw coordinates (${event.rawX}, ${event.rawY})")
+            true
         }
     }
 
