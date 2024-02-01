@@ -41,12 +41,16 @@ class DragCircleView : CustomViewScaffold {
             return super.onTouchEvent(event)
         }
         val distanceFromCircleCenter = pointsDistance(event.x, event.y, circleXCenter, circleYCenter)
-        return if (distanceFromCircleCenter <= circleRadius && event.action == MotionEvent.ACTION_DOWN) {
+        if (distanceFromCircleCenter <= circleRadius && event.action == MotionEvent.ACTION_DOWN) {
+            // 두 점 사이의 거리가 원의 반지름보다 작고, 액션이 Down = 0 이면?
             isDragged = true
             lastMotionEventX = event.x
             lastMotionEventY = event.y
-            true
+            return true
         } else if (isDragged && event.action == MotionEvent.ACTION_MOVE) {
+            // 드래그 중이고, 액션이 Move = 2 이면?
+
+            // 원의 중심을 옮겨 주어야 하기 때문에 기존 원에서 새로운 원까지의 거리를 계산 (dx, dy)
             val dx = event.x - lastMotionEventX
             val dy = event.y - lastMotionEventY
             circleXCenter += dx
@@ -54,10 +58,12 @@ class DragCircleView : CustomViewScaffold {
             lastMotionEventX = event.x
             lastMotionEventY = event.y
             invalidate()
-            true
+//            postInvalidate()
+            return true
         } else {
+            // 그 외 액션은 드래그 멈춤
             isDragged = false
-            false
+            return false
         }
     }
 
@@ -78,11 +84,14 @@ class DragCircleView : CustomViewScaffold {
 
     /**
      * Compute the Euclidean distance between two points using the Pythagorean theorem
+     * 두 점 사이의 거리
      */
     private fun pointsDistance(x1: Float, y1: Float, x2: Float, y2: Float): Float {
         val dx = x1 - x2
         val dy = y1 - y2
-        return sqrt(dx*dx + dy*dy)
+        val dx2 = dx * dx
+        val dy2 = dy * dy
+        return sqrt(dx2 + dy2) // 루트
     }
 
 }

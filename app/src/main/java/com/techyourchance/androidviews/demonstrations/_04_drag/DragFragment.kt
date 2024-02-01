@@ -16,7 +16,12 @@ class DragFragment : BaseFragment() {
     
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return DragCircleView(context)
+        return DragCircleView(context).apply {
+            setOnTouchListener { view, motionEvent ->
+                Timber.i("touch event with action ${motionEvent.action} ${motionEvent.x} ${motionEvent.y}")
+                false // true면 DragCircleView로 이벤트가 전달되지 않는다.
+            }
+        }
     }
 
     companion object {
