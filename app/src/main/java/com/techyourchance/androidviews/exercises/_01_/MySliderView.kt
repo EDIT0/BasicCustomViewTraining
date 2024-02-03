@@ -143,7 +143,6 @@ class MySliderView : CustomViewScaffold {
     }
 
     companion object {
-        const val MARGIN = 20f
         const val LINE_HEIGHT = 10f
     }
 }

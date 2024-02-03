@@ -8,7 +8,6 @@ import android.widget.TextView
 import com.techyourchance.androidviews.general.BaseFragment
 import com.techyourchance.androidviews.R
 import com.techyourchance.androidviews.exercises._03_.SliderChangeListener
-import timber.log.Timber
 
 class MySliderFragment : BaseFragment(), SliderChangeListener {
 
@@ -28,7 +27,6 @@ class MySliderFragment : BaseFragment(), SliderChangeListener {
     }
 
     override fun onValueChanged(value: Float) {
-        Timber.i("onValueChanged() value: ${value}")
         txtValue.text = value.toString()
     }
 
