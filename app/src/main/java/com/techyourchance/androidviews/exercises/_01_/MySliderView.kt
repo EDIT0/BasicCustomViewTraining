@@ -9,12 +9,15 @@ import android.view.MotionEvent
 import androidx.core.content.ContextCompat
 import com.techyourchance.androidviews.CustomViewScaffold
 import com.techyourchance.androidviews.R
+import com.techyourchance.androidviews.exercises._03_.SliderChangeListener
 import timber.log.Timber
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sqrt
 
 class MySliderView : CustomViewScaffold {
+
+    private var sliderChangeListener: SliderChangeListener? = null
 
     private var linePaint = Paint()
     private var startX = 0f
@@ -31,6 +34,9 @@ class MySliderView : CustomViewScaffold {
     private var lastXPoint = 0f
     private var lastYPoint = 0f
 
+    private var lineWidth = 0f
+    private var currentPercentValue = 0.0f
+
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
@@ -40,6 +46,11 @@ class MySliderView : CustomViewScaffold {
         defStyleAttr,
         defStyleRes
     )
+
+    fun setSliderChangeListener(listener: SliderChangeListener) {
+        sliderChangeListener = listener
+    }
+    fun getCurrentPercentValue(): Float = currentPercentValue
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         if(event == null) {
@@ -79,6 +90,7 @@ class MySliderView : CustomViewScaffold {
             lastXPoint = event.x
 //            lastYPoint = event.y
 
+            updatePercentValue()
             invalidate()
             return true
         } else {
@@ -91,14 +103,24 @@ class MySliderView : CustomViewScaffold {
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
 
-        startX = dpToPx(MARGIN)
-        startY = h / 2f
-        stopX = w - dpToPx(MARGIN)
-        stopY = h / 2f
-
         centerX = w / 2f
         centerY = h / 2f
         radius = h / 3f
+
+        startX = radius
+        startY = h / 2f
+        stopX = w - radius
+        stopY = h / 2f
+
+        updatePercentValue()
+    }
+
+    private fun updatePercentValue() {
+        lineWidth = stopX - startX
+        val currentX = centerX - radius
+        currentPercentValue = (currentX / lineWidth) * 1.0f
+        Timber.i("lineWidth: ${lineWidth} currentX: ${currentX} currentPercentValue: ${currentPercentValue}")
+        sliderChangeListener?.onValueChanged(currentPercentValue)
     }
 
     override fun onDraw(canvas: Canvas) {
