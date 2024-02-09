@@ -3,6 +3,8 @@ package com.techyourchance.androidviews.exercises._01_
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.os.Parcel
+import android.os.Parcelable
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
@@ -35,7 +37,7 @@ class MySliderView : CustomViewScaffold {
     private var lastYPoint = 0f
 
     private var lineWidth = 0f
-    private var currentPercentValue = 0.0f
+    private var currentPercentValue = 0.5f
 
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
@@ -103,23 +105,23 @@ class MySliderView : CustomViewScaffold {
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
 
-        centerX = w / 2f
-        centerY = h / 2f
-        radius = h / 3f
-
         startX = radius
         startY = h / 2f
         stopX = w - radius
         stopY = h / 2f
+
+        centerX = (stopX - startX) * currentPercentValue // 비율로 원의 중심 설정
+        centerY = h / 2f
+        radius = h / 3f
 
         updatePercentValue()
     }
 
     private fun updatePercentValue() {
         lineWidth = stopX - startX
-        val currentX = centerX - radius
-        currentPercentValue = (currentX / lineWidth) * 1.0f
-        Timber.i("lineWidth: ${lineWidth} currentX: ${currentX} currentPercentValue: ${currentPercentValue}")
+//        val currentX = centerX - radius
+        currentPercentValue = (centerX / lineWidth) * 1.0f
+        Timber.i("lineWidth: ${lineWidth} centerX: ${centerX} currentPercentValue: ${currentPercentValue}")
         sliderChangeListener?.onValueChanged(currentPercentValue)
     }
 
@@ -142,7 +144,59 @@ class MySliderView : CustomViewScaffold {
         return sqrt(x + y)
     }
 
+    override fun onSaveInstanceState(): Parcelable? {
+        return CircleSavedState(super.onSaveInstanceState(), currentPercentValue)
+    }
+
+    override fun onRestoreInstanceState(state: Parcelable?) {
+        super.onRestoreInstanceState(state)
+        if(state is CircleSavedState) {
+            this.currentPercentValue = state.circleXCenterFraction
+            invalidate()
+        }
+    }
+
     companion object {
         const val LINE_HEIGHT = 10f
+    }
+
+    private class CircleSavedState: BaseSavedState {
+
+        val superSavedState: Parcelable?
+        val circleXCenterFraction: Float
+//        val circleYCenterFraction: Float
+
+        constructor(
+            superSavedState: Parcelable?,
+            circleXCenterFraction: Float,
+//            circleYCenterFraction: Float,
+        ): super(superSavedState) {
+            this.superSavedState = superSavedState
+            this.circleXCenterFraction = circleXCenterFraction
+//            this.circleYCenterFraction = circleYCenterFraction
+        }
+
+        constructor(parcel: Parcel) : super(parcel) {
+            this.superSavedState = parcel.readParcelable(null)
+            this.circleXCenterFraction = parcel.readFloat()
+//            this.circleYCenterFraction = parcel.readFloat()
+        }
+
+        override fun writeToParcel(out: Parcel, flags: Int) {
+            super.writeToParcel(out, flags)
+            out.writeParcelable(superSavedState, flags)
+            out.writeFloat(circleXCenterFraction)
+//            out.writeFloat(circleYCenterFraction)
+        }
+
+        companion object CREATOR : Parcelable.Creator<CircleSavedState> {
+            override fun createFromParcel(parcel: Parcel): CircleSavedState {
+                return CircleSavedState(parcel)
+            }
+
+            override fun newArray(size: Int): Array<CircleSavedState?> {
+                return arrayOfNulls(size)
+            }
+        }
     }
 }
