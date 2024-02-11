@@ -105,23 +105,26 @@ class MySliderView : CustomViewScaffold {
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
 
+        radius = h / 3f
+
         startX = radius
         startY = h / 2f
         stopX = w - radius
         stopY = h / 2f
 
-        centerX = (stopX - startX) * currentPercentValue // 비율로 원의 중심 설정
+        centerX = (stopX - startX) * currentPercentValue + radius // 비율로 원의 중심 설정
         centerY = h / 2f
-        radius = h / 3f
+
+        Timber.i("MYTAG ${centerX} ${startX} ${stopX} ${w}")
 
         updatePercentValue()
     }
 
     private fun updatePercentValue() {
         lineWidth = stopX - startX
-//        val currentX = centerX - radius
-        currentPercentValue = (centerX / lineWidth) * 1.0f
-        Timber.i("lineWidth: ${lineWidth} centerX: ${centerX} currentPercentValue: ${currentPercentValue}")
+        val currentX = centerX - radius
+        currentPercentValue = (currentX / lineWidth) * 1.0f
+        Timber.i("MYTAG lineWidth: ${lineWidth} currentX: ${currentX} currentPercentValue: ${currentPercentValue}")
         sliderChangeListener?.onValueChanged(currentPercentValue)
     }
 
@@ -131,6 +134,7 @@ class MySliderView : CustomViewScaffold {
         linePaint.color = ContextCompat.getColor(context, R.color.gray_light)
 
         canvas.drawLine(startX, startY, stopX, stopY, linePaint)
+        Timber.i("MYTAG ${startX} ${stopX}")
 
         circlePaint.style = Paint.Style.FILL
         circlePaint.color = ContextCompat.getColor(context, R.color.primary)
@@ -149,10 +153,12 @@ class MySliderView : CustomViewScaffold {
     }
 
     override fun onRestoreInstanceState(state: Parcelable?) {
-        super.onRestoreInstanceState(state)
         if(state is CircleSavedState) {
+            super.onRestoreInstanceState(state.superSavedState)
             this.currentPercentValue = state.circleXCenterFraction
             invalidate()
+        } else {
+            super.onRestoreInstanceState(state)
         }
     }
 
