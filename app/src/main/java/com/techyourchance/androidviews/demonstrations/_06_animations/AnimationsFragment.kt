@@ -57,17 +57,17 @@ class AnimationsFragment : BaseFragment() {
                 viewAnimations.translationX
             )
             objectAnimator = ObjectAnimator.ofFloat(
-                viewAnimations2,
+                viewAnimations2, // Target Object
                 "translationX",
-                animationAmplitude,
-                -animationAmplitude
+                animationAmplitude, // 진폭
+                -animationAmplitude // 진폭
             ).apply {
-                interpolator = LinearInterpolator()
-                duration = ANIMATION_PERIOD_NS / 1_000_000 / 2
-                repeatCount = ValueAnimator.INFINITE
-                repeatMode = ValueAnimator.REVERSE
+                interpolator = LinearInterpolator() // 일정하게
+                duration = ANIMATION_PERIOD_NS / 1_000_000 / 2 // 하나의 애니메이션에 대한 지속시간
+                repeatCount = ValueAnimator.INFINITE // 반복 횟수
+                repeatMode = ValueAnimator.REVERSE // 애니메이션이 끝난 후에 RESTART, REVERSE 어떻게 할 것인지?
                 val relativePosition = (viewAnimations.translationX + animationAmplitude) / (2 * animationAmplitude)
-                setCurrentFraction(relativePosition)
+                setCurrentFraction(relativePosition) // 애니메이션 시작 지점 설정 (0.0 ~ 1.0 사이)
                 start()
             }
 

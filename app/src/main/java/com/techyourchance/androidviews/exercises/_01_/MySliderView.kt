@@ -112,7 +112,7 @@ class MySliderView : CustomViewScaffold {
         stopX = w - radius
         stopY = h / 2f
 
-        centerX = (stopX - startX) * currentPercentValue + radius // 비율로 원의 중심 설정
+        centerX = (stopX - startX) * currentPercentValue + startX // 비율로 원의 중심 설정, center를 맞추려면 회색 선 길이가 왼쪽 끝부터 startX만큼 띄워져 있기 때문에 더해줘야 한다..
         centerY = h / 2f
 
         Timber.i("MYTAG ${centerX} ${startX} ${stopX} ${w}")
