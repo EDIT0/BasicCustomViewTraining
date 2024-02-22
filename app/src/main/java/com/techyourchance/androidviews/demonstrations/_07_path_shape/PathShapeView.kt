@@ -32,6 +32,7 @@ class PathShapeView : CustomViewScaffold {
 
         val viewBorderLineSize = dpToPx(VIEW_BORDER_LINE_SIZE_DP)
         val viewBorderPadding = viewBorderLineSize / 2
+        // viewBorderPadding을 주는 이유는 left, top을 0f로 주면 너비가 0f를 기준으로 그려지기 때문에 왼쪽(left)과 위쪽(top)이 짤린다.
         viewBorderRect.set(
             viewBorderPadding,
             viewBorderPadding,
@@ -42,14 +43,15 @@ class PathShapeView : CustomViewScaffold {
         viewBorderPaint.color = Color.RED
         viewBorderPaint.style = Paint.Style.STROKE
         viewBorderPaint.strokeWidth = viewBorderLineSize
-        viewBorderPaint.pathEffect = DashPathEffect(floatArrayOf(10f, 10f), 0f)
+        viewBorderPaint.pathEffect = DashPathEffect(floatArrayOf(10f, 10f), 0f) // 점선
 
         triangleLineSize = dpToPx(LINE_SIZE_DP)
 
         trianglePaint.color = ContextCompat.getColor(context, R.color.primary_variant)
         trianglePaint.style = Paint.Style.STROKE
         trianglePaint.strokeWidth = triangleLineSize
-        trianglePaint.isAntiAlias = true
+        trianglePaint.isAntiAlias = true // 가장자리 매끄럽게 true
+        trianglePaint.strokeJoin = Paint.Join.ROUND
 
         updateTrianglePath(w, h, triangleLineSize)
     }
@@ -63,11 +65,22 @@ class PathShapeView : CustomViewScaffold {
         val triangleTop = PointF(width / 2f, height - triangleSideLength * sqrt(3f) / 2)
 
         trianglePath.reset()
-        trianglePath.moveTo(triangleTop.x, triangleTop.y)
-        trianglePath.lineTo(triangleRight.x, triangleRight.y)
-        trianglePath.lineTo(triangleLeft.x, triangleLeft.y)
-        trianglePath.lineTo(triangleTop.x, triangleTop.y)
-        trianglePath.close()
+        trianglePath.moveTo(triangleTop.x, triangleTop.y) // 그리기 위치 시작점
+        trianglePath.lineTo(triangleRight.x, triangleRight.y) // 오른쪽 지점까지 그리기
+        trianglePath.lineTo(triangleLeft.x, triangleLeft.y) // 왼쪽 지점까지 그리기
+        trianglePath.lineTo(triangleTop.x, triangleTop.y) // 시작 위치까지 그리기
+        trianglePath.close() // close를 해야 닫힌다
+
+        // 이런식으로 가능
+        trianglePath.apply {
+//            reset()
+//            moveTo(triangleTop.x, triangleTop.y)
+//            lineTo(triangleRight.x, triangleRight.y)
+//            moveTo(triangleRight.x, triangleRight.y)
+//            lineTo(triangleLeft.x, triangleLeft.y)
+//            moveTo(triangleLeft.x, triangleLeft.y)
+//            lineTo(triangleTop.x, triangleTop.y)
+        }
     }
 
     private fun computeMaxAvailableTriangleSideLength(viewWidth: Int, viewHeight: Int, minPadding: Float): Float {

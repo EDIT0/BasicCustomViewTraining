@@ -8,6 +8,7 @@ import android.view.animation.LinearInterpolator
 import androidx.core.content.ContextCompat
 import com.techyourchance.androidviews.CustomViewScaffold
 import com.techyourchance.androidviews.R
+import timber.log.Timber
 import kotlin.math.sqrt
 
 class PathAnimationView : CustomViewScaffold {
@@ -92,18 +93,30 @@ class PathAnimationView : CustomViewScaffold {
         referenceTrianglePath.close()
     }
 
-    private fun updateTrianglePath(fraction: Float) {
-        val pathMeasure = PathMeasure(referenceTrianglePath, false)
+    private fun updateTrianglePath(fraction: Float) { // fraction 0 ~ 1 => 애니메이션 한 사이클 경로라고 보면 됨 (0 ~ 1)
+        // 삼각형의 전체 길이를 알 수 있다.
+        val pathMeasure = PathMeasure(referenceTrianglePath, false) // 경로 측정, 완성된 삼각형 Path
         val totalLength = 3 * triangleSideLength
         trianglePath.reset()
+//        Timber.d("MYTAG ${fraction}")
         if (fraction <= 1f) {
+            // getSegment() 그려질 Path의 시작과 끝을 알 수 있다. 하나의 변
+            // public boolean getSegment(float startD, float stopD, android.graphics.Path dst, boolean startWithMoveTo)
+            // startD: 시작점 (전체길이 * fraction)
+            // stopD: 종료점
+            // Path: trianglePath는 삼각형을 그릴 경로 값
+            // startWithMoveTo: 내가 움직여 놓은 곳부터 시작 true
             pathMeasure.getSegment(0f, fraction * totalLength, trianglePath, true)
-            if (fraction == 1f) {
+            Timber.d("MYTAG ${0f} ${fraction * totalLength} ${trianglePath}")
+            if (fraction == 1f) { // 끝에 도달했을 때 close로 막아주기
                 trianglePath.close()
             }
         } else {
+            // ValueAnimator.ofFloat(0f, 2f)
+            // 애니메이션이 2바퀴 돌기 때문에 fraction 값이 0 ~ 2가 나온다.
             val startFraction = fraction - 1
             pathMeasure.getSegment(startFraction * totalLength, totalLength, trianglePath, true)
+            Timber.d("MYTAG ${startFraction * totalLength} ${totalLength} ${trianglePath}")
         }
         invalidate()
     }
