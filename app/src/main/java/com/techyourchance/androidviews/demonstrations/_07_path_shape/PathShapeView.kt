@@ -6,6 +6,7 @@ import android.util.AttributeSet
 import androidx.core.content.ContextCompat
 import com.techyourchance.androidviews.CustomViewScaffold
 import com.techyourchance.androidviews.R
+import timber.log.Timber
 import kotlin.math.sqrt
 
 class PathShapeView : CustomViewScaffold {
@@ -59,6 +60,7 @@ class PathShapeView : CustomViewScaffold {
     private fun updateTrianglePath(width: Int, height: Int, minPadding: Float) {
         val triangleSideLength = computeMaxAvailableTriangleSideLength(width, height, minPadding)
         val triangleHorizontalMargin = (width - triangleSideLength) / 2
+        Timber.d("MYTAG ${triangleSideLength} / ${triangleHorizontalMargin}")
 
         val triangleLeft = PointF(triangleHorizontalMargin, height.toFloat() - minPadding)
         val triangleRight = PointF(width - triangleHorizontalMargin, triangleLeft.y)
@@ -83,13 +85,15 @@ class PathShapeView : CustomViewScaffold {
         }
     }
 
+    // 정삼각형의 변의 길이를 구한다.
     private fun computeMaxAvailableTriangleSideLength(viewWidth: Int, viewHeight: Int, minPadding: Float): Float {
         val viewWidthMinusPadding = viewWidth - 2 * minPadding
-        val heightForViewWidthMinusPadding = viewWidthMinusPadding * sqrt(3f) / 2
-        return if (viewHeight >= heightForViewWidthMinusPadding) {
+        val heightForViewWidthMinusPadding = viewWidthMinusPadding * sqrt(3f) / 2 // 정삼각형 높이 구하는 공식
+        Timber.d("MYTAG ${viewWidthMinusPadding} ${heightForViewWidthMinusPadding}")
+        return if (viewHeight >= heightForViewWidthMinusPadding) { // 정삼각형 높이가 디바이스 View 높이보다 작으면, 밑변 길이 리턴
             viewWidthMinusPadding
         } else {
-            return (viewHeight - 2 * minPadding) * 2 / sqrt(3f)
+            return (viewHeight - 2 * minPadding) * 2 / sqrt(3f) // 정삼각형 높이가 디바이스 View 높이보다 크다면,디바이스 View 높이를 기준으로 다시 계산 후 리턴
         }
     }
 

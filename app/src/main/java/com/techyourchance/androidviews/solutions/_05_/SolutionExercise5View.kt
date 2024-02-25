@@ -8,6 +8,7 @@ import android.view.animation.LinearInterpolator
 import androidx.core.content.ContextCompat
 import com.techyourchance.androidviews.CustomViewScaffold
 import com.techyourchance.androidviews.R
+import timber.log.Timber
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -63,6 +64,7 @@ class SolutionExercise5View : CustomViewScaffold {
         checkmarkShortSideLength = calculateCheckmarkShortSideLength(viewWidth, viewHeight, minPadding)
         val checkmarkWidth = sqrt(5f) * checkmarkShortSideLength
         val checkmarkHeight = 2 * checkmarkShortSideLength / sqrt(5f)
+        Timber.d("MYTAG checkmarkWidth: ${checkmarkWidth} checkmarkHeight: ${checkmarkHeight}")
         val checkmarkTop = (viewHeight - checkmarkHeight) / 2
         val checkmarkLeft = (viewWidth - checkmarkWidth) / 2
         val pivotPointX = checkmarkLeft + sqrt(checkmarkShortSideLength.pow(2) - checkmarkHeight.pow(2))
