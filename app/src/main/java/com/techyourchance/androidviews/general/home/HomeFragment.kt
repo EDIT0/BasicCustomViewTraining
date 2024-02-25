@@ -1,23 +1,36 @@
 package com.techyourchance.androidviews.general.home
 
+import android.animation.AnimatorSet
+import android.animation.ValueAnimator
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
+import android.view.animation.LinearInterpolator
+import android.view.animation.OvershootInterpolator
 import android.widget.TextView
+import androidx.cardview.widget.CardView
+import androidx.core.animation.doOnEnd
+import androidx.core.animation.doOnStart
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.techyourchance.androidviews.general.BaseFragment
 import com.techyourchance.androidviews.R
 import com.techyourchance.androidviews.general.navigation.ScreenSpec
+import timber.log.Timber
 
 class HomeFragment : BaseFragment() {
 
     private lateinit var destinationsRecycler: RecyclerView
     private lateinit var destinationsAdapter: DestinationsAdapter
+
+    private var animatorSet: AnimatorSet? = null
+    private var animation1: ValueAnimator? = null
+    private var animation2: ValueAnimator? = null
+    private var animation3: ValueAnimator? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view = layoutInflater.inflate(R.layout.layout_home, container, false).apply {
@@ -161,6 +174,41 @@ class HomeFragment : BaseFragment() {
             }
             val destination = destinations[position]
             viewHolder.txtDestinationTitle.text = destination.title
+
+
+            animation1 = ValueAnimator.ofFloat(500f, 0f).apply {
+                interpolator = LinearInterpolator()
+                duration = 500L
+                addUpdateListener {
+                    viewHolder.cardView.translationY = (it.animatedValue as Float)
+                }
+            }
+
+            animation2 = ValueAnimator.ofFloat(0f, 1.2f, 1f).apply {
+                interpolator = LinearInterpolator()
+                duration = 1000L
+                addUpdateListener {
+                    viewHolder.cardView.scaleX = it.animatedValue as Float
+                    viewHolder.cardView.scaleY = it.animatedValue as Float
+                }
+            }
+
+            animation3 = ValueAnimator.ofFloat(0f, 720f, 0f).apply {
+                interpolator = OvershootInterpolator()
+                duration = 1000L
+                addUpdateListener {
+                    viewHolder.cardView.rotation = it.animatedValue as Float
+                }
+            }
+
+            animatorSet = AnimatorSet().apply {
+                play(animation1)
+                play(animation2)
+                play(animation3)
+                start()
+            }
+
+
             viewHolder.view.setOnClickListener {
                 onDestinationClicked(destination)
             }
@@ -176,5 +224,6 @@ class HomeFragment : BaseFragment() {
 
     class DestinationViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         val txtDestinationTitle: TextView = view.findViewById(R.id.txtDestinationTitle)
+        val cardView: CardView = view.findViewById(R.id.cardView)
     }
 }

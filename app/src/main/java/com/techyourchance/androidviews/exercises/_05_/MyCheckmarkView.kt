@@ -1,5 +1,6 @@
 package com.techyourchance.androidviews.exercises._05_
 
+import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
@@ -9,6 +10,7 @@ import android.graphics.PathMeasure
 import android.graphics.PointF
 import android.util.AttributeSet
 import android.view.animation.LinearInterpolator
+import androidx.core.animation.doOnStart
 import androidx.core.content.ContextCompat
 import com.techyourchance.androidviews.CustomViewScaffold
 import com.techyourchance.androidviews.R
@@ -22,10 +24,18 @@ class MyCheckmarkView : CustomViewScaffold {
     private var checkLineSize = 0f // 두께
     private val checkPath = Path() // 경로 그리기
     private val checkPathForAnimation = Path() // 애니메이션을 위한 경로
+    private var checkScaleFractionForAnimation = 1f // 스케일 애니메이션을 위한 값
+    private var checkRotateFractionForAnimation = 0f
 
     private var shortSideLength = 0f
 
+    private var startPoint = PointF()
+    private var middlePoint = PointF()
+    private var endPoint = PointF()
+
     private var valueAnimator: ValueAnimator? = null
+    private var scaleAnimator: ValueAnimator? = null
+    private var animatorSet: AnimatorSet? = null
 
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
@@ -44,12 +54,37 @@ class MyCheckmarkView : CustomViewScaffold {
             addUpdateListener {
                 updateCheckPath(it.animatedValue as Float)
             }
+            doOnStart {
+                ValueAnimator.ofFloat(0f, -10f, 10f, 0f).apply {
+                    interpolator = LinearInterpolator()
+                    duration = durationMs + durationMs / 2
+                    addUpdateListener {
+                        updateCheckRotate(it.animatedValue as Float)
+                    }
+                    start()
+                }
+            }
+        }
+
+        scaleAnimator = ValueAnimator.ofFloat(1f, 1.2f, 1f).apply {
+            interpolator = LinearInterpolator()
+            duration = durationMs
+            addUpdateListener {
+                updateCheckScale(it.animatedValue as Float)
+            }
+        }
+
+        animatorSet = AnimatorSet().apply {
+//            play(valueAnimator)
+//            play(scaleAnimator)
+            playSequentially(valueAnimator, scaleAnimator)
             start()
         }
     }
 
     fun stopAnimation() {
         valueAnimator?.cancel()
+        animatorSet?.cancel()
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -72,10 +107,10 @@ class MyCheckmarkView : CustomViewScaffold {
         val checkHeight = 2 * shortSideLength / sqrt(5f) // 높이 구하기
         Timber.d("MYTAG checkWidth: ${checkWidth} checkHeight: ${checkHeight} ${sqrt(shortSideLength.pow(2) - checkHeight.pow(2))}")
 
-        val startPoint = PointF((w - checkWidth) / 2, (h - checkHeight) / 2)
+        startPoint = PointF((w - checkWidth) / 2, (h - checkHeight) / 2)
         // middlePoint의 x: 기존 x 시작점 + 피타고라스 공식 이용(대각선^2 - 높이^2 = 밑변)
-        val middlePoint = PointF(((w - checkWidth) / 2) + sqrt(shortSideLength.pow(2) - checkHeight.pow(2)), h - ((h - checkHeight) / 2))
-        val endPoint = PointF(w - ((w - checkWidth) / 2), (h - checkHeight) / 2)
+        middlePoint = PointF(((w - checkWidth) / 2) + sqrt(shortSideLength.pow(2) - checkHeight.pow(2)), h - ((h - checkHeight) / 2))
+        endPoint = PointF(w - ((w - checkWidth) / 2), (h - checkHeight) / 2)
 
         checkPath.apply {
             reset()
@@ -97,12 +132,14 @@ class MyCheckmarkView : CustomViewScaffold {
         }
     }
 
-    private fun updateCheckPath(fraction: Float) { // fraction 0 ~ 1 => 애니메이션 한 사이클 경로라고 보면 됨 (0 ~ 1)
+    private fun updateCheckPath(fraction: Float) { // fraction은 ofFloat()의 범위에 따라 값을 반환 ofFloat(0f, 1f) 0 ~ 1 => 애니메이션 한 사이클 경로라고 보면 됨 (0 ~ 1)
         val pathMeasure = PathMeasure(checkPath, false) // 경로 측정, 완성된 삼각형 Path
         val totalLength = shortSideLength * 3
         checkPathForAnimation.reset()
 
-        if(fraction <= 1f) {
+        Timber.d("MYTAG valueAnimator fraction: ${fraction}")
+
+        if (fraction <= 1f) {
             pathMeasure.getSegment(0f, fraction * totalLength, checkPathForAnimation, true)
         } else {
 
@@ -110,8 +147,25 @@ class MyCheckmarkView : CustomViewScaffold {
         invalidate()
     }
 
+    private fun updateCheckScale(fraction: Float) {
+        checkScaleFractionForAnimation = fraction
+        Timber.d("MYTAG sacleAnimator fraction: ${fraction}")
+        invalidate()
+    }
+
+    private fun updateCheckRotate(fraction: Float) {
+        checkRotateFractionForAnimation = fraction
+        Timber.d("MYTAG rotateAnimator fraction: ${fraction}")
+        invalidate()
+    }
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+        // scaleX, scaleY: 서로 x와 y방향으로 확대, 축소 된다.
+        // middle.x, y 기준으로 확대, 축소
+        // 1 ~ 1.2, 1.2 ~ 1
+        canvas.scale(checkScaleFractionForAnimation, checkScaleFractionForAnimation, middlePoint.x, middlePoint.y)
+        canvas.rotate(checkRotateFractionForAnimation, middlePoint.x, middlePoint.y)
         canvas.drawPath(checkPathForAnimation, checkPaint)
     }
 

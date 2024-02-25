@@ -93,7 +93,7 @@ class PathAnimationView : CustomViewScaffold {
         referenceTrianglePath.close()
     }
 
-    private fun updateTrianglePath(fraction: Float) { // fraction 0 ~ 1 => 애니메이션 한 사이클 경로라고 보면 됨 (0 ~ 1)
+    private fun updateTrianglePath(fraction: Float) { // fraction은 ofFloat()의 범위에 따라 값을 반환 ofFloat(0f, 1f) 0 ~ 1 => 애니메이션 한 사이클 경로라고 보면 됨 (0 ~ 1)
         // 삼각형의 전체 길이를 알 수 있다.
         val pathMeasure = PathMeasure(referenceTrianglePath, false) // 경로 측정, 완성된 삼각형 Path
         val totalLength = 3 * triangleSideLength
